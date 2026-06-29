@@ -1,98 +1,109 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth, useUser } from "@clerk/expo";
+import { AuthView, UserButton } from "@clerk/expo/native";
+import { useEffect, useState } from "react";
+import SetTodo from "./SetTodo";
+import { Redirect } from "expo-router";
+import {
+  ActivityIndicator,
+  Button,
+  Modal,
+  StyleSheet,
+  View,
+} from "react-native";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function MainScreen() {
+  const { isLoaded, isSignedIn, getToken } = useAuth({
+    treatPendingAsSignedOut: false,
+  });
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+  const { user } = useUser();
+
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isSynced, setIsSynced] = useState(false);
+
+useEffect(() => {
+  if (!isLoaded || !isSignedIn || !user || isSynced) return;
+
+  const syncUser = async () => {
+    try {
+      setIsSyncing(true);
+
+      const token = await getToken();
+
+      if (!token) return;
+
+      const response = await fetch(
+        "http://192.168.29.177:3000/users/setUser",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to sync user");
+      }
+
+      setIsSynced(true);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  syncUser();
+}, [isLoaded, isSignedIn, user]);
+
+if (!isLoaded || isSyncing) {
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <View style={styles.centered}>
+      <ActivityIndicator size="large" />
+    </View>
   );
 }
 
-export default function HomeScreen() {
+if (isSynced) {
+  console.log("Redirecting to Home...");
+  return <Redirect href="/SetTodo" />;
+}
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <View style={styles.container}>
+      {isSignedIn ? (
+        <UserButton />
+      ) : (
+        <Button
+          title="Sign in"
+          onPress={() => setIsAuthOpen(true)}
+        />
+      )}
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <Modal
+        visible={isAuthOpen}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setIsAuthOpen(false)}
+      >
+        <AuthView onDismiss={() => setIsAuthOpen(false)} />
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
