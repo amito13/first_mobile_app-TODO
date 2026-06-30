@@ -2,9 +2,11 @@ import { useAuth, useUser } from "@clerk/expo";
 import { AuthView, UserButton } from "@clerk/expo/native";
 import { useEffect, useState } from "react";
 import HeroHeader from "../components/HeroHeader";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IMAGES } from "../../assets/images";
 import { Image } from "expo-image";
+import { BlurView } from "expo-blur";
 import { Redirect } from "expo-router";
 import {
   ActivityIndicator,
@@ -16,13 +18,18 @@ import {
 import { COLORS } from "../../theme/colors";
 import { FONT } from "../../theme/typography";
 import AppButton from "../components/AppButton";
+import { Mail } from "lucide-react-native";
 
 
 export default function MainScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth({
     treatPendingAsSignedOut: false,
   });
-
+useEffect(() => {
+  if (isSignedIn) {
+    setIsAuthOpen(false);
+  }
+}, [isSignedIn]);
   const { user } = useUser();
 
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -127,19 +134,33 @@ if (isSynced) {
         style={StyleSheet.absoluteFill}
         contentFit="cover"
     />
-<View style={styles.authCard}>
-  <Text style={styles.title}>Todo</Text>
+<BlurView
+  intensity={35}
+  tint="light"  
+  style={styles.authCard}
+>
+  <Text style={styles.title}>Todo-That actually matters</Text>
 
   <Text style={styles.subtitle}>
     Organize your tasks,{"\n"}
     find your peace.
   </Text>
   <AppButton
-    title="Sign In"
-    onPress={() => {}}
+  title="Sign In"
+  icon={Mail}
+  onPress={() => setIsAuthOpen(true)}
 />
-</View>
-
+</BlurView>
+<Modal
+  visible={isAuthOpen}
+  animationType="slide"
+  presentationStyle="pageSheet"
+  onRequestClose={() => setIsAuthOpen(false)}
+>
+  <AuthView
+    onDismiss={() => setIsAuthOpen(false)}
+  />
+</Modal>
 </SafeAreaView>
   );
 }
@@ -173,32 +194,38 @@ title: {
   textAlign: "center",
 },
 subtitle: {
-  marginTop: 12,
-
   fontFamily: FONT.body,
-
   fontSize: 16,
-
   lineHeight: 24,
-
-  color: COLORS.subText,
-
   textAlign: "center",
+
+  color: "#2E2A24",
+
+  textShadowColor: "rgba(255,255,255,0.55)",
+  textShadowOffset: {
+    width: 0,
+    height: 1,
+  },
+  textShadowRadius: 3,
 },
 authCard: {
   position: "absolute",
+
   left: 24,
   right: 24,
   bottom: 32,
 
-  borderRadius: 30,
-
   padding: 24,
 
-  backgroundColor: "rgba(255,255,255,0.18)",
+  borderRadius: 30,
+
+  overflow: "hidden",
 
   borderWidth: 1,
 
   borderColor: "rgba(255,255,255,0.25)",
+
+  backgroundColor: "rgba(255,255,255,0.08)",
+  
 }
 });

@@ -1,40 +1,63 @@
 import React from "react";
+
 import {
   TouchableOpacity,
   Text,
   StyleSheet,
   ActivityIndicator,
+  View,
 } from "react-native";
-
+import { Icon, LucideIcon } from "lucide-react-native";
 import { COLORS } from "../../theme/colors";
 import { RADIUS } from "../../theme/radius";
 import { FONT } from "../../theme/typography";
-
+import { Mail } from "lucide-react-native";
 type Props = {
   title: string;
   onPress: () => void;
   loading?: boolean;
+  icon?: LucideIcon;
 };
-
 export default function AppButton({
   title,
   onPress,
   loading = false,
-}: Props) {
-  return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={onPress}
-      style={styles.button}
-      disabled={loading}
-    >
-      {loading ? (
-        <ActivityIndicator color="white" />
-      ) : (
-        <Text style={styles.text}>{title}</Text>
-      )}
-    </TouchableOpacity>
-  );
+  icon: Icon,
+}: Props)
+
+
+{
+  const onPressHandler = () => {
+    console.log("Button pressed");
+    onPress();
+  };
+return (
+  <TouchableOpacity
+    activeOpacity={0.9}
+    onPress={onPressHandler}
+    style={styles.button}
+    disabled={loading}
+  >
+    {loading ? (
+      <ActivityIndicator color="#FFF" />
+    ) : (
+      <View style={styles.content}>
+        {Icon && (
+          <Icon
+            size={20}
+            color="#FFF"
+            strokeWidth={2}
+            style={{ marginRight: 12 }}
+          />
+        )}
+
+        <Text style={styles.text}>
+          {title}
+        </Text>
+      </View>
+    )}
+  </TouchableOpacity>
+);
 }
 
 const styles = StyleSheet.create({
@@ -64,6 +87,11 @@ button: {
 
   elevation: 8,
 },
+content: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+},  
 text: {
   color: "#FFF",
 

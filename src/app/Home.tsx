@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Header from "../components/home/Header";
+import HeroArtwork from "../components/home/HeroArtwork";
+import FilterTabs from "../components/home/FilterTabs";
+import TodoCard from "../components/home/TodoCard";
 import {
   Image,
   Modal
@@ -14,25 +19,34 @@ import { useUser } from "@clerk/expo";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {router} from "expo-router";
+import { IMAGES } from "@/assets/images";
 const Home = () => {
   const { user } = useUser();
   const { signOut } = useAuth();
   const [profileVisible, setProfileVisible] = useState(false);  
+  const [selectedTab, setSelectedTab] = useState("All");
   return (
+
     <SafeAreaView style={styles.container}>
       {/* Header */}
+      <ScrollView>
+    
       <View style={styles.header}>
-        <TouchableOpacity
+        { <TouchableOpacity
             style={styles.avatar}
             onPress={() => setProfileVisible(true)}
           >
             <Text style={styles.avatarText}>
               {user?.firstName?.charAt(0)}
             </Text>
-        </TouchableOpacity>
-
-       
+        </TouchableOpacity> 
+        }
       </View>
+
+
+
+      
+      
 
       {/* Hero Card */}
       <View style={styles.heroCard}>
@@ -78,7 +92,7 @@ const Home = () => {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.actionCard}
-      onPress={() => router.push("/todo")}>
+      onPress={() => router.push("t/odo")}>
         <Text style={styles.actionEmoji}>📋</Text>
 
         <View>
@@ -177,6 +191,7 @@ const Home = () => {
     </View>
   </View>
 </Modal>
+</ScrollView>
     </SafeAreaView>
   );
 };
