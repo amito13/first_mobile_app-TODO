@@ -1,15 +1,22 @@
 import { useAuth, useUser } from "@clerk/expo";
 import { AuthView, UserButton } from "@clerk/expo/native";
 import { useEffect, useState } from "react";
-import SetTodo from "./SetTodo";
+import HeroHeader from "../components/HeroHeader";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { IMAGES } from "../../assets/images";
+import { Image } from "expo-image";
 import { Redirect } from "expo-router";
 import {
   ActivityIndicator,
   Button,
   Modal,
   StyleSheet,
-  View,
+  View,Text
 } from "react-native";
+import { COLORS } from "../../theme/colors";
+import { FONT } from "../../theme/typography";
+import AppButton from "../components/AppButton";
+
 
 export default function MainScreen() {
   const { isLoaded, isSignedIn, getToken } = useAuth({
@@ -69,29 +76,71 @@ if (!isLoaded || isSyncing) {
 
 if (isSynced) {
   console.log("Redirecting to Home...");
-  return <Redirect href="/SetTodo" />;
+  return <Redirect href="/Home" />;
 }
 
   return (
-    <View style={styles.container}>
-      {isSignedIn ? (
-        <UserButton />
-      ) : (
-        <Button
-          title="Sign in"
-          onPress={() => setIsAuthOpen(true)}
-        />
-      )}
+    
+//     <SafeAreaView style={styles.container}>
+    
+//     {/* <HeroHeader
+//         source={IMAGES.authHeader}
+//         height={400}
+//     />
+// <View style={styles.content}>
 
-      <Modal
-        visible={isAuthOpen}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setIsAuthOpen(false)}
-      >
-        <AuthView onDismiss={() => setIsAuthOpen(false)} />
-      </Modal>
-    </View>
+//     <Text style={styles.title}>
+//         Todo
+//     </Text>
+
+//     <Text style={styles.subtitle}>
+//         Organize your tasks,
+//         {"\n"}
+//         find your peace.
+//     </Text>
+
+// </View>
+
+//       {isSignedIn ? (
+//         <UserButton />
+//       ) : (
+//         <AppButton
+//           title="Sign In"
+//           onPress={() => {}}
+//       />
+//       )}
+
+//       <Modal
+//         visible={isAuthOpen}
+//         animationType="slide"
+//         presentationStyle="pageSheet"
+//         onRequestClose={() => setIsAuthOpen(false)}
+//       >
+//         <AuthView onDismiss={() => setIsAuthOpen(false)} />
+//       </Modal> */}
+     
+//     </SafeAreaView>
+<SafeAreaView style={styles.container}>
+
+    <Image
+        source={IMAGES.authHeader}
+        style={StyleSheet.absoluteFill}
+        contentFit="cover"
+    />
+<View style={styles.authCard}>
+  <Text style={styles.title}>Todo</Text>
+
+  <Text style={styles.subtitle}>
+    Organize your tasks,{"\n"}
+    find your peace.
+  </Text>
+  <AppButton
+    title="Sign In"
+    onPress={() => {}}
+/>
+</View>
+
+</SafeAreaView>
   );
 }
 
@@ -102,8 +151,54 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    flex: 1
   },
+content: {
+  flex: 1,
+
+  marginTop: -35,
+
+  backgroundColor: COLORS.background,
+
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
+
+  paddingHorizontal: 24,
+  paddingTop: 80,
+},
+title: {
+  fontFamily: FONT.heading,
+  fontSize: 48,
+  color: COLORS.text,
+  textAlign: "center",
+},
+subtitle: {
+  marginTop: 12,
+
+  fontFamily: FONT.body,
+
+  fontSize: 16,
+
+  lineHeight: 24,
+
+  color: COLORS.subText,
+
+  textAlign: "center",
+},
+authCard: {
+  position: "absolute",
+  left: 24,
+  right: 24,
+  bottom: 32,
+
+  borderRadius: 30,
+
+  padding: 24,
+
+  backgroundColor: "rgba(255,255,255,0.18)",
+
+  borderWidth: 1,
+
+  borderColor: "rgba(255,255,255,0.25)",
+}
 });

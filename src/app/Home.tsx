@@ -1,32 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  Image,
+  Modal
+} from "react-native";
+import { useAuth } from "@clerk/expo";
 import { useUser } from "@clerk/expo";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SetTodo from "./SetTodo";
+
+import {router} from "expo-router";
 const Home = () => {
   const { user } = useUser();
-
+  const { signOut } = useAuth();
+  const [profileVisible, setProfileVisible] = useState(false);  
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>👋 Welcome Back</Text>
-          <Text style={styles.name}>
-            {user?.firstName ?? "User"}
-          </Text>
-        </View>
+        <TouchableOpacity
+            style={styles.avatar}
+            onPress={() => setProfileVisible(true)}
+          >
+            <Text style={styles.avatarText}>
+              {user?.firstName?.charAt(0)}
+            </Text>
+        </TouchableOpacity>
 
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {user?.firstName?.charAt(0)}
-          </Text>
-        </View>
+       
       </View>
 
       {/* Hero Card */}
@@ -58,7 +63,9 @@ const Home = () => {
       {/* Quick Actions */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
 
-      <TouchableOpacity style={styles.actionCard}>
+      <TouchableOpacity style={styles.actionCard}
+      onPress={() => router.push("/todo/create")}  
+      >
         <Text style={styles.actionEmoji}>➕</Text>
 
         <View>
@@ -70,7 +77,8 @@ const Home = () => {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.actionCard}>
+      <TouchableOpacity style={styles.actionCard}
+      onPress={() => router.push("/todo")}>
         <Text style={styles.actionEmoji}>📋</Text>
 
         <View>
@@ -93,7 +101,82 @@ const Home = () => {
           </Text>
         </View>
       </TouchableOpacity>
-      <SetTodo />
+
+      <Modal
+  visible={profileVisible}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setProfileVisible(false)}
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.profileCard}>
+
+      <Image
+        source={{ uri: user?.imageUrl }}
+        style={styles.profileImage}
+      />
+
+      <Text style={styles.profileName}>
+        {user?.fullName}
+      </Text>
+
+      <Text style={styles.profileEmail}>
+        {user?.primaryEmailAddress?.emailAddress}
+      </Text>
+
+      <View style={styles.infoBox}>
+        <Text style={styles.infoTitle}>User ID</Text>
+        <Text style={styles.infoText}>{user?.id}</Text>
+      </View>
+
+      <View style={styles.infoBox}>
+        <Text style={styles.infoTitle}>Username</Text>
+        <Text style={styles.infoText}>
+          {user?.username ?? "Not Set"}
+        </Text>
+      </View>
+
+      <View style={styles.infoBox}>
+        <Text style={styles.infoTitle}>Phone</Text>
+        <Text style={styles.infoText}>
+          {user?.primaryPhoneNumber?.phoneNumber ??
+            "Not Available"}
+        </Text>
+      </View>
+
+      <View style={styles.infoBox}>
+        <Text style={styles.infoTitle}>Created At</Text>
+        <Text style={styles.infoText}>
+          {user?.createdAt
+            ? new Date(user.createdAt).toLocaleDateString()
+            : "-"}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={() => setProfileVisible(false)}
+      >
+        <Text style={styles.closeText}>Close</Text>
+      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={async () => {
+            try {
+              await signOut();
+              setProfileVisible(false);
+              router.replace("/");
+            } catch (error) {
+              console.log(error);
+            }
+          }}
+        >
+          <Text style={styles.closeText}>Sign Out</Text>
+        </TouchableOpacity>
+
+    </View>
+  </View>
+</Modal>
     </SafeAreaView>
   );
 };
@@ -213,4 +296,68 @@ const styles = StyleSheet.create({
     color: "#94A3B8",
     marginTop: 4,
   },
+  modalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.6)",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+profileCard: {
+  width: "90%",
+  backgroundColor: "#1E293B",
+  borderRadius: 25,
+  padding: 25,
+  alignItems: "center",
+},
+
+profileImage: {
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+  marginBottom: 20,
+},
+
+profileName: {
+  color: "#fff",
+  fontSize: 24,
+  fontWeight: "700",
+},
+
+profileEmail: {
+  color: "#94A3B8",
+  marginBottom: 20,
+},
+
+infoBox: {
+  width: "100%",
+  backgroundColor: "#0F172A",
+  borderRadius: 12,
+  padding: 14,
+  marginBottom: 12,
+},
+
+infoTitle: {
+  color: "#94A3B8",
+  fontSize: 12,
+},
+
+infoText: {
+  color: "#fff",
+  fontSize: 16,
+  marginTop: 5,
+},
+
+closeButton: {
+  marginTop: 20,
+  backgroundColor: "#2563EB",
+  paddingVertical: 14,
+  paddingHorizontal: 40,
+  borderRadius: 12,
+},
+
+closeText: {
+  color: "#fff",
+  fontWeight: "700",
+},
 });

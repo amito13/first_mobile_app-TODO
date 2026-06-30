@@ -11,7 +11,7 @@ import {
   Platform,
 } from "react-native";
 import { useAuth } from "@clerk/expo";
-
+import { router } from "expo-router";
 const SetTodo = () => {
   const { getToken } = useAuth();
 
@@ -29,6 +29,7 @@ const SetTodo = () => {
       setLoading(true);
 
       const token = await getToken();
+
 
       const response = await fetch(
         "http://192.168.29.177:3000/todos/setTodo",
@@ -51,7 +52,7 @@ const SetTodo = () => {
         throw new Error(data.message);
       }
 
-      Alert.alert("Success", "Todo created successfully!");
+      router.push("/todo");
 
       setTitle("");
       setDescription("");
