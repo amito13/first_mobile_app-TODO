@@ -48,7 +48,7 @@ useEffect(() => {
       if (!token) return;
 
       const response = await fetch(
-        "http://192.168.29.177:3000/users/setUser",
+       process.env.EXPO_PUBLIC_GET_USER_URL || "https://api.amitdewangan.app/users/setUser",
         {
           method: "POST",
           headers: {
