@@ -44,11 +44,11 @@ useEffect(() => {
       setIsSyncing(true);
 
       const token = await getToken();
-
       if (!token) return;
 
       const response = await fetch(
-       process.env.EXPO_PUBLIC_GET_USER_URL || "https://api.amitdewangan.app/users/setUser",
+        process.env.EXPO_PUBLIC_GET_USER_URL ||
+          "http://192.168.29.177:8000/users/setUser",
         {
           method: "POST",
           headers: {
@@ -57,12 +57,13 @@ useEffect(() => {
           },
         }
       );
-
+//have to fix the order the api calling and response
       if (!response.ok) {
         throw new Error("Failed to sync user");
       }
-
       setIsSynced(true);
+
+      
     } catch (error) {
       console.log(error);
     } finally {
